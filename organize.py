@@ -5,11 +5,14 @@ from threading import Thread
 import time
 import numpy
 import subprocess
+import sys
 
 dir = os.getcwd()
 folder = r"C:\Users\sride\OneDrive\Desktop\sdvk\py\ImageFaceOrganizer\sample_folder"
 count = 1
 REF = "ref[]."
+
+[ _, folder ] = sys.argv
 
 image_files = {}
 known_faces = {}
@@ -22,7 +25,7 @@ def timer( func ): #decorator to time the function
     return wrapper
 
 def get_ref_img( dir_name ):
-    for filename in os.listdir( dir_name, hiddenfiles=True ):
+    for filename in os.listdir( dir_name ):
         if REF in filename :
             ref_path = os.path.join( dir_name, filename )
             return cv.imread( ref_path, cv.IMREAD_COLOR )
@@ -57,7 +60,7 @@ def organize( image, filename ): #comparing and organizing image
             unknown_encoding = face_recognition.face_encodings( cropped_face )
             if not unknown_encoding : continue 
             
-            result = face_recognition.compare_faces([known_encoding], unknown_encoding[0], 0.6)
+            result = face_recognition.compare_faces([known_encoding], unknown_encoding[0], 0.55)
             
             if True in result:
                 cv.imwrite(os.path.join( folder, name, filename), image ) 
@@ -75,7 +78,7 @@ def organize( image, filename ): #comparing and organizing image
 
             cv.imwrite( os.path.join( dir_path, filename ), image ) 
             cv.imwrite( ref_filepath, cropped_face ) 
-            # subprocess.run(["attrib","+H", ref_filepath ], check=True)
+            subprocess.run(["attrib","+H", ref_filepath ], check=True)
 
             known_faces[name] = cropped_face
 
