@@ -1,3 +1,3 @@
-
-#     detected_faces = face_recognition.face_encodings(image)
-#     for face in detected_faces:
+if result[0][0] == True:
+                cv.imwrite(os.path.join( folder, name, filename), image ) 
+            
