@@ -9,6 +9,7 @@ import subprocess
 dir = os.getcwd()
 folder = r"C:\Users\sride\OneDrive\Desktop\sdvk\py\ImageFaceOrganizer\sample_folder"
 count = 1
+REF = "ref[]."
 
 image_files = {}
 known_faces = {}
@@ -20,6 +21,13 @@ def timer( func ): #decorator to time the function
         print( func.__name__ + "\t" +str( time.time() -start_time ) )
     return wrapper
 
+def get_ref_img( dir_name ):
+    for filename in os.listdir( dir_name, hiddenfiles=True ):
+        if REF in filename :
+            ref_path = os.path.join( dir_name, filename )
+            return cv.imread( ref_path, cv.IMREAD_COLOR )
+
+
 @timer
 def load_file(): #loading and saving files and folders
     for filename in os.listdir(folder):
@@ -29,7 +37,10 @@ def load_file(): #loading and saving files and folders
             if not ext.lower() in ("jpg","png","jpeg") : continue
             image_files[filename] =  cv.imread( file_path, cv.IMREAD_COLOR) 
         else:
-            pass
+            ref_img = get_ref_img( file_path )
+            if ref_img is None : return
+            known_faces[filename] = ref_img
+            
 
 
 def organize( image, filename ): #comparing and organizing image
@@ -59,8 +70,13 @@ def organize( image, filename ): #comparing and organizing image
                 count+=1
             
             os.mkdir( dir_path )
-            cv.imwrite(os.path.join( dir_path, "rf[]"+filename ), cropped_face ) 
-            cv.imwrite(os.path.join( dir_path, filename ), image ) 
+            ref_filename = REF +filename.split(".")[-1]
+            ref_filepath = os.path.join( dir_path, ref_filename )
+
+            cv.imwrite( os.path.join( dir_path, filename ), image ) 
+            cv.imwrite( ref_filepath, cropped_face ) 
+            # subprocess.run(["attrib","+H", ref_filepath ], check=True)
+
             known_faces[name] = cropped_face
 
 
